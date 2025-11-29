@@ -1,4 +1,4 @@
-# view.py
+
 from abc import ABC, abstractmethod
 
 class UIComponent(ABC):
@@ -28,7 +28,7 @@ class InfoComponent(UIComponent):
         return [f"当前行动: {self.player}", f"系统提示: {self.msg}"]
 
 class ConsoleUIBuilder:
-    """UI建造者：负责组装不同的组件"""
+    # UI建造者：负责组装不同的组件
     def __init__(self):
         self.components = []
 
@@ -48,7 +48,6 @@ class ConsoleUIBuilder:
                 print(line)
             print("-" * 20)
         self.components = [] # 重置
-    # 加在 ConsoleUIBuilder 类中
     def add_help(self):
         help_msg = [
             "操作指南:",

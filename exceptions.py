@@ -1,4 +1,4 @@
-# exceptions.py
+
 class GameError(Exception):
     """游戏基础异常"""
     pass

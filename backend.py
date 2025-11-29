@@ -1,11 +1,11 @@
-# backend.py
+
 from abc import ABC, abstractmethod
 import copy
 import pickle
 from exceptions import *
 
 class Board:
-    """棋盘类：只负责存储数据"""
+    # 棋盘类：只负责存储数据
     def __init__(self, size):
         self.size = size
         # 0: 空, 1: 黑, 2: 白
@@ -20,7 +20,7 @@ class Board:
         return black, white
 
 class GameBase(ABC):
-    """抽象游戏基类"""
+    # 抽象游戏基类
     def __init__(self, size=15):
         # 限制棋盘大小 
         if not (8 <= size <= 19):
@@ -42,22 +42,22 @@ class GameBase(ABC):
         """
         通用落子逻辑 (五子棋直接使用，围棋需重写以处理提子)
         """
-        # 1. 基础检查
+        # 基础检查
         if not self.board.is_valid(x, y):
             raise InvalidMoveError("坐标超出棋盘范围")
         if self.board.grid[x][y] != 0:
             raise InvalidMoveError("此处已有棋子")
         
-        # 2. 规则检查
+        # 规则检查
         self.check_rules(x, y, self.current_player)
 
-        # 3. 保存快照 (Deepcopy)
+        # 保存快照
         self.history.append(copy.deepcopy(self.board.grid))
 
-        # 4. 执行落子
+        # 执行落子
         self.board.grid[x][y] = self.current_player
         
-        # 5. 胜负已分则不切换(可选)，或者由客户端判断。此处仅切换。
+
         self.current_player = 3 - self.current_player
 
     def undo(self): 
@@ -77,10 +77,10 @@ class GameBase(ABC):
             raise GameStateError(f"保存失败: {str(e)}")
 
 class GomokuGame(GameBase):
-    """五子棋逻辑实现"""
+    # 五子棋逻辑实现
     
     def check_rules(self, x, y, player):
-        # 第一阶段五子棋无需特殊规则，仅需基础合法性（已在make_move检查）
+        # 五子棋无需特殊规则，仅需基础合法性（已在make_move检查）
         pass
 
     def check_winner(self): 
@@ -90,8 +90,6 @@ class GomokuGame(GameBase):
         # 检查四个方向：横、竖、左斜、右斜
         directions = [(0, 1), (1, 0), (1, 1), (1, -1)]
         
-        # 只需要检查当前棋盘上所有点，或者优化为只检查最后落子点(但在check_winner接口里通常检查全局)
-        # 这里为了通用性，遍历全盘（稍微低效但逻辑简单稳健）
         for r in range(size):
             for c in range(size):
                 p = grid[r][c]
@@ -116,17 +114,17 @@ class GomokuGame(GameBase):
         return 3 # 平局
 
 class GoGame(GameBase):
-    """围棋逻辑实现"""
+    # 围棋逻辑实现
 
     def make_move(self, x, y):
         # 重写围棋的落子逻辑，因为涉及提子、打劫和自杀判断
-        # 1. 基础检查
+        # 基础检查
         if not self.board.is_valid(x, y):
             raise InvalidMoveError("坐标超出棋盘范围")
         if self.board.grid[x][y] != 0:
             raise InvalidMoveError("此处已有棋子")
 
-        # 2. 模拟落子 (Trial)
+        # 模拟落子
         # 必须在真实落子前模拟，判断是否提子或自杀
         trial_grid = copy.deepcopy(self.board.grid)
         trial_grid[x][y] = self.current_player
@@ -134,7 +132,7 @@ class GoGame(GameBase):
         opponent = 3 - self.current_player
         captured_stones = []
 
-        # 3. 检查邻居对手棋子是否无气 (提子逻辑 )
+        # 检查邻居对手棋子是否无气 (提子逻辑)
         neighbors = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         for dx, dy in neighbors:
             nx, ny = x + dx, y + dy
@@ -148,19 +146,19 @@ class GoGame(GameBase):
         for cx, cy in captured_stones:
             trial_grid[cx][cy] = 0
 
-        # 4. 检查自杀 (禁入点)：自己落下后无气，且没有提掉对手
+        # 检查自杀 (禁入点)：自己落下后无气，且没有提掉对手
         # 下子时不能下到不合法位置
         my_group, my_liberties = self._get_group_liberties(trial_grid, x, y)
         if my_liberties == 0:
             raise InvalidMoveError("禁入点 (自杀操作)")
 
-        # 5. 检查全局同型 (打劫 Ko)
+        # 检查全局同型 (打劫 Ko)
         if self.history and trial_grid == self.history[-1]:
             # 注意：简单的劫争规则是不能立即回到上一步。
             # 严格来说应该检查整个历史，但基本劫争通常只检查上一步。
             raise InvalidMoveError("全局同型 (打劫禁手)")
 
-        # === 确认落子合法，应用更改 ===
+        # 确认落子合法，应用更改
         self.history.append(copy.deepcopy(self.board.grid)) # 存旧状态
         self.board.grid = trial_grid # 应用新状态
         self.current_player = opponent # 切换玩家
@@ -170,7 +168,7 @@ class GoGame(GameBase):
         pass
     
     def pass_turn(self): 
-        """虚着：不落子，直接切换"""
+        # 虚着：不落子，直接切换
         self.history.append(copy.deepcopy(self.board.grid))
         self.current_player = 3 - self.current_player
 
@@ -178,10 +176,10 @@ class GoGame(GameBase):
         """
         围棋终局判断 
         当双方虚着或无子可下时调用。
-        这里实现简单的数子法（子多者胜）。
+        这里是数子法（子多者胜）。
         """
         black, white = self.board.count_stones()
-        # 贴目逻辑此处简化，直接比子数
+
         if black > white:
             return 1
         elif white > black:

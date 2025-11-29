@@ -1,4 +1,4 @@
-# client.py
+
 import sys
 import os
 import pickle
@@ -16,9 +16,9 @@ class GameClient:
         self.pass_count = 0 
 
     def start(self):
-        """游戏启动入口：负责初始化配置"""
+        # 游戏启动入口：负责初始化配置
         while True:
-            # 1. 渲染简易的启动界面
+            # 渲染简易的启动界面
             self._clear_screen()
             print("=== 棋类对战平台 ===")
             print("1. 新游戏: start <type> <size> (例如: start gomoku 15 或 start go 19)")
@@ -27,7 +27,7 @@ class GameClient:
             print("-" * 30)
             print(f"系统提示: {self.last_message}")
             
-            # 2. 获取输入
+            # 获取输入
             try:
                 user_input = input("\n请输入指令 > ").strip().split()
                 if not user_input: continue
@@ -71,9 +71,9 @@ class GameClient:
                 self.last_message = f"错误: {str(e)}"
 
     def game_loop(self):
-        """游戏主循环"""
+        # 游戏主循环
         while True:
-            # 1. 渲染界面 
+            # 渲染界面 
             self.ui_builder\
                 .add_board(self.game.board.grid)\
                 .add_info(self.game.current_player, self.last_message)
@@ -83,14 +83,14 @@ class GameClient:
             
             self.ui_builder.build_and_show()
 
-            # 2. 检查胜负状态 (在渲染后检查，确保用户看到最后一步)
+            # 检查胜负状态 (在渲染后检查，确保用户看到最后一步)
             winner = self.check_game_over()
             if winner is not None:
                 print(f"\n=== 游戏结束! {winner} ===")
                 input("按回车键返回主菜单...")
                 return # 退出该函数，返回 start() 的循环
 
-            # 3. 获取并处理指令
+            # 获取并处理指令
             user_input = input("指令 > ").strip().lower()
             try:
                 self.handle_input(user_input)
@@ -109,7 +109,7 @@ class GameClient:
         if not parts: return
         cmd = parts[0]
 
-        # === 落子指令 ===
+        # 落子指令
         if cmd == 'move': 
             if len(parts) != 3:
                 raise InvalidCommandError("格式错误。应为: move <row> <col>")
@@ -122,7 +122,7 @@ class GameClient:
             self.pass_count = 0 # 落子后重置虚着计数
             self.last_message = "落子成功"
 
-        # === 围棋虚着 ===
+        # 围棋虚着
         elif cmd == 'pass': 
             if isinstance(self.game, GoGame):
                 self.game.pass_turn()
@@ -131,13 +131,13 @@ class GameClient:
             else:
                 raise InvalidCommandError("只有围棋可以虚着")
 
-        # === 悔棋 ===
+        # 悔棋
         elif cmd == 'undo': 
             self.game.undo()
             self.pass_count = 0 # 悔棋可能会破坏连续虚着状态，简单起见重置
             self.last_message = "悔棋成功"
 
-        # === 认负 ===
+        # 认负
         elif cmd == 'resign': 
             # 认负直接判对方胜
             winner_id = 3 - self.game.current_player
@@ -149,14 +149,14 @@ class GameClient:
             input("按回车返回...")
             raise GameStateError("游戏结束") # 利用异常跳出当前逻辑，实际应用可优化
 
-        # === 存档 ===
+        # 存档
         elif cmd == 'save': 
             if len(parts) != 2:
                 raise InvalidCommandError("格式: save <filename>")
             self.game.save_game(parts[1])
             self.last_message = f"游戏已保存至 {parts[1]}"
 
-        # === 重新开始 ===
+        # 重新开始
         elif cmd == 'restart': 
             # 保留原配置重新开局
             size = self.game.board.size
@@ -165,7 +165,7 @@ class GameClient:
             self.pass_count = 0
             self.last_message = "游戏已重置"
 
-        # === 界面控制 ===
+        # 界面控制
         elif cmd == 'hint': 
             self.show_hints = not self.show_hints
             self.last_message = f"提示已{'显示' if self.show_hints else '隐藏'}"
@@ -178,7 +178,7 @@ class GameClient:
             raise InvalidCommandError("未知指令，输入 hint 查看帮助")
 
     def check_game_over(self):
-        """检查游戏是否结束"""
+        # 检查游戏是否结束
         winner_id = 0
         
         # 情况1: 五子棋连珠 (每次落子后 backend 可能会计算，或者在这里调用)
@@ -203,7 +203,7 @@ class GameClient:
         return None
 
     def load_game(self, filepath):
-        """读取存档逻辑"""
+        # 读取存档逻辑
         try:
             with open(filepath, 'rb') as f:
                 loaded_game = pickle.load(f)
