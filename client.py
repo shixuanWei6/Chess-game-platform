@@ -142,12 +142,16 @@ class GameClient:
             # 认负直接判对方胜
             winner_id = 3 - self.game.current_player
             winner_str = "黑方" if winner_id == 1 else "白方"
+            
+            # 构建胜负消息
             self.last_message = f"{winner_str} 获胜 (对方认负)"
-            # 这里通过抛出一个特殊的结束信号或者修改状态让 loop 检测到
-            # 简单处理：直接强行结束
+            
+            # 显示最终结果
             print(f"\n=== {self.last_message} ===")
-            input("按回车返回...")
-            raise GameStateError("游戏结束") # 利用异常跳出当前逻辑，实际应用可优化
+            input("按回车键返回主菜单...")
+            
+            # 使用 StopIteration 跳出 game_loop
+            raise StopIteration("游戏结束")
 
         # 存档
         elif cmd == 'save': 
@@ -172,6 +176,7 @@ class GameClient:
 
         elif cmd == 'quit': 
             # 这里是返回主菜单
+            self.last_message = "已返回主菜单"
             raise StopIteration("返回主菜单") # 借用异常跳出
 
         else:
