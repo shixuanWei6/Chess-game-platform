@@ -20,12 +20,21 @@ class BoardComponent(UIComponent):
         return lines
 
 class InfoComponent(UIComponent):
-    def __init__(self, current_player, msg):
-        self.player = "黑方" if current_player == 1 else "白方"
+    def __init__(self, current_player, msg, p1_info, p2_info):
+        self.current = current_player
         self.msg = msg
+        self.p1 = p1_info
+        self.p2 = p2_info
 
     def render(self):
-        return [f"当前行动: {self.player}", f"系统提示: {self.msg}"]
+        # 简单显示示例
+        arrow_p1 = "<<" if self.current == 1 else "  "
+        arrow_p2 = "<<" if self.current == 2 else "  "
+        return [
+            f"黑方: {self.p1} {arrow_p1}",
+            f"白方: {self.p2} {arrow_p2}",
+            f"系统提示: {self.msg}"
+        ]
 
 class ConsoleUIBuilder:
     # UI建造者：负责组装不同的组件
@@ -36,8 +45,9 @@ class ConsoleUIBuilder:
         self.components.append(BoardComponent(board_grid))
         return self
 
-    def add_info(self, player, msg):
-        self.components.append(InfoComponent(player, msg))
+    # 增加 p1_info 和 p2_info 参数
+    def add_info(self, player, msg, p1_info, p2_info):
+        self.components.append(InfoComponent(player, msg, p1_info, p2_info))
         return self
 
     def build_and_show(self):

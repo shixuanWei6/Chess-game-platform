@@ -1,0 +1,22 @@
+{
+    "wsx": {
+        "password": "1",
+        "wins": 3,
+        "total": 3
+    },
+    "xl": {
+        "password": "1",
+        "wins": 0,
+        "total": 3
+    },
+    "alice": {
+        "password": "123",
+        "wins": 1,
+        "total": 1
+    },
+    "bob": {
+        "password": "456",
+        "wins": 0,
+        "total": 1
+    }
+}
